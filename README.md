@@ -1,5 +1,23 @@
 # Real-Time Mandelbrot Set Accelerator on PYNQ-Z1
 
+<p align="left">
+  <a href="https://www.xilinx.com/products/silicon-devices/soc/zynq-7000.html">
+    <img src="https://img.shields.io/badge/Platform-Xilinx%20Zynq--7000-F26222.svg" alt="Platform">
+  </a>
+  <a href="https://en.wikipedia.org/wiki/SystemVerilog">
+    <img src="https://img.shields.io/badge/HDL-SystemVerilog-1DBA5A.svg" alt="Hardware Description Language">
+  </a>
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Software-Python%20%26%20PYNQ-3776AB.svg" alt="Software">
+  </a>
+  <a href="https://flask.palletsprojects.com/">
+    <img src="https://img.shields.io/badge/Web%20UI-Flask%20%2B%20JS-000000.svg" alt="Web UI">
+  </a>
+  <a href="https://www.xilinx.com/products/design-tools/vivado.html">
+    <img src="https://img.shields.io/badge/Tools-Xilinx%20Vivado-76b900.svg" alt="FPGA Tools">
+  </a>
+</p>
+
 This project demonstrates a complete hardware/software co-design of a real-time Mandelbrot Set fractal explorer, accelerated on a Xilinx Zynq-7000 SoC (PYNQ-Z1). The system leverages the parallelism of an FPGA to achieve high-speed rendering, controlled by a user-friendly web interface.
 
 This repository serves as a portfolio piece showcasing skills in digital logic design, hardware acceleration, Python for hardware control, and full-stack web development.
@@ -23,7 +41,7 @@ This repository serves as a portfolio piece showcasing skills in digital logic d
 
 ## System Architecture
 
-The project follows a classic Zynq hardware/software co-design pattern. The system is divided between the **Processing System (PS)**, which runs a Linux OS and Python code, and the **Programmable Logic (PL)**, which contains our custom hardware accelerator.
+The project follows a classic Zynq hardware/software co-design pattern. The system is divided between the **Processing System (PS)**, which runs a Linux OS and Python code, and the **Programmable Logic (PL)**, which contains our custom hardware accelerator. For a detailed technical breakdown of the accelerator's internal state machine and Verilog implementation, please see the **[Implementation Details](./docs/implementation.md)** document.
 
 ![Block Diagram](path/to/your/block_diagram.png) (TO BE ADDED)
 
