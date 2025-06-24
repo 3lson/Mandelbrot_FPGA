@@ -1,0 +1,15 @@
+// Detailed Mandelbrot State Machine
+digraph {
+	rankdir=TB
+	node [shape=record style=filled]
+	S_IDLE [label="{S_IDLE|Actions:\l• done = 0\l• Wait for start\l}"]
+	S_COMPUTE [label="{S_COMPUTE|Actions:\l• Calculate z² + c\l• Increment iteration\l• Check escape condition\l}"]
+	S_DONE [label="{S_DONE|Actions:\l• done = 1\l• Output final count\l}"]
+	S_IDLE -> S_COMPUTE [label="start = 1\n\nInitialize:\n• z_real = 0\n• z_imag = 0\n• current_iter = 0"]
+	S_COMPUTE -> S_COMPUTE [label="|z²| < 4 AND\ncurrent_iter < max_iter\n\nUpdate:\n• z = z² + c\n• iter++"]
+	S_COMPUTE -> S_DONE [label="|z²| ≥ 4 OR\ncurrent_iter ≥ max_iter"]
+	S_DONE -> S_IDLE [label="Next clock cycle"]
+	edge [color=red style=dashed]
+	S_COMPUTE -> S_IDLE [label=rst constraint=false]
+	S_DONE -> S_IDLE [label=rst constraint=false]
+}

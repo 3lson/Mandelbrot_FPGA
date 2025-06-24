@@ -1,0 +1,20 @@
+// Mandelbrot State Machine
+digraph {
+	rankdir=LR
+	node [shape=circle style=filled]
+	S_IDLE [label="S_IDLE
+(Waiting)"]
+	S_COMPUTE [label="S_COMPUTE
+(Iterating)"]
+	S_DONE [label="S_DONE
+(Complete)"]
+	S_IDLE -> S_COMPUTE [label="start = 1"]
+	S_IDLE -> S_IDLE [label="start = 0"]
+	S_COMPUTE -> S_DONE [label="escape condition OR
+max iterations"]
+	S_COMPUTE -> S_COMPUTE [label="continue iterating"]
+	S_DONE -> S_IDLE [label="automatic
+(done = 1)"]
+	S_COMPUTE -> S_IDLE [label=rst constraint=false]
+	S_DONE -> S_IDLE [label=rst constraint=false]
+}

@@ -1,3 +1,5 @@
+# This will outline a python visualisation of the Mandlebrot Set
+
 import numpy as np
 import matplotlib.pyplot as plt
 
