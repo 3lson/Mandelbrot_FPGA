@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandelbrot Accelerator Control Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+    <header>
+        <div class="header-title">
+            <h1>Mandelbrot Mathematics Accelerator</h1>
+            <p>UI Mockup - Not Connected to Hardware</p>
+        </div>
+        <div class="header-buttons">
+            <button id="btn-how-it-works" class="header-button">How It Works</button>
+            <button id="btn-theme-toggle" class="header-button">Dark Mode</button>
+        </div>
+    </header>
+
+        <main>
+            <div class="mandelbrot-display-mock">
+                <div class="info-overlay">
+                    <h2>(This space represents the HDMI monitor output)</h2>
+                    <p>Click to Zoom In. Use Arrow Keys to Pan.</p>
+                </div>
+                <div id="loading-spinner" class="spinner-hidden"></div>
+            </div>
+
+            <div class="controls-panel">
+                <section class="control-group">
+                    <h3>Performance</h3>
+                    <div class="metrics-display" id="perf-metrics">
+                        <div>Mode: <span id="metric-mode">--</span></div>
+                        <div>Render Time: <span id="metric-time">--</span>s</div>
+                        <div>FPS: <span id="metric-fps">--</span></div>
+                        <div>Throughput: <span id="metric-throughput">--</span></div>
+                    </div>
+                    <div class="render-mode">
+                        <label><input type="radio" name="renderMode" value="fpga" checked> FPGA</label>
+                        <label><input type="radio" name="renderMode" value="cpu"> CPU</label>
+                    </div>
+                </section>
+
+                <section class="control-group">
+                    <h3>View Controls</h3>
+                    <label for="iter-slider">
+                        Iterations 
+                        <span class="tooltip" data-tooltip="Sets the maximum number of calculations per pixel. Higher values reveal more detail in the fractal but take longer to compute.">[?]</span>
+                        : <span id="iter-value">500</span>
+                    </label>
+                    <input type="range" id="iter-slider" min="50" max="2000" value="500" step="10">
+
+                    <label for="precision-slider">Precision
+                        <span class="tooltip" data-tooltip="Controls the fixed-point number format used in the FPGA. Lower precision is faster but can cause visual artifacts (pixelation) at high zoom levels.">[?]</span>
+                        : <span id="precision-value">32-bit</span>
+                    </label>
+                    <input type="range" id="precision-slider" min="16" max="32" value="32" step="8">
+                </section>
+
+                <section class="control-group">
+                    <h3>Appearance</h3>
+                    <label for="color-scheme">Color Scheme</label>
+                    <select id="color-scheme">
+                        <option value="blue_white">Blue/White Gradient</option>
+                        <option value="histogram">Histogram Equalized</option>
+                        <option value="ultra_fractal">Ultra Fractal</option>
+                    </select>
+                </section>
+                
+                <section class="control-group">
+                    <h3>Presets</h3>
+                    <div class="button-group">
+                        <button id="btn-reset">Reset View</button>
+                        <button class="btn-preset" data-preset="seahorse">Seahorse Valley</button>
+                        <button class="btn-preset" data-preset="elephant">Elephant Valley</button>
+                        <button class="btn-preset" data-preset="spiral">Double Spiral</button>
+                    </div>
+                </section>
+
+                <section class="control-group explanation-box">
+                    <h3>Live Explanation</h3>
+                    <p id="live-explanation-text">
+                        <span id="exp-mode"></span>
+                        <span id="exp-iter"></span>
+                        <span id="exp-zoom"></span>
+                    </p>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- Add this entire block before the closing </body> tag -->
+<div id="modal-container" class="modal-container">
+    <div class="modal-content">
+        <button id="modal-close" class="modal-close">×</button>
+        <h2>How This Accelerator Works</h2>
+        
+        <h3>1. The Math: What is the Mandelbrot Set?</h3>
+        <p>
+            The image you see is a map of complex numbers. For each pixel (which represents a complex number, <strong>c</strong>), we perform an iterative calculation:
+            <code>z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c</code>, starting with <code>z<sub>0</sub> = 0</code>.
+        </p>
+        <p>
+            If the value of <strong>z</strong> grows infinitely large, the point is <em>outside</em> the set. If it stays small forever, it's <em>inside</em> the set (colored black). The beautiful colors show how quickly a point "escapes" to infinity. The <strong>Iterations</strong> slider controls how many steps we check before giving up.
+        </p>
+
+        <h3>2. The Hardware: Why use an FPGA?</h3>
+        <p>
+            The calculation for each pixel is completely independent of its neighbors. This is called an "embarrassingly parallel" problem.
+        </p>
+        <ul>
+            <li><strong>CPU (Software):</strong> A CPU processes tasks sequentially. To render the image, it calculates pixel 1, then pixel 2, then pixel 3, and so on. This is slow.</li>
+            <li><strong>FPGA (Hardware):</strong> We have configured the FPGA to be a custom parallel processor. It contains many small "Mandelbrot solver" cores that we designed in Verilog. It can calculate dozens or hundreds of pixels at the exact same time, making it dramatically faster.</li>
+        </ul>
+        <p>
+            The <strong>Precision</strong> slider controls the number of bits used for calculations in the FPGA. Lower precision can lead to visual errors at high zoom levels, demonstrating a classic hardware trade-off between speed, resources, and accuracy.
+        </p>
+
+        <h3>3. The Interaction Flow</h3>
+        <p>
+            When you click, pan, or change a slider, this web UI sends your request to the Python code running on the PYNQ board's CPU. The Python code then translates your view (e.g., zoom level) into mathematical parameters and writes them to the FPGA's control registers over the AXI bus. The FPGA immediately begins computing the new view in hardware and streams the result directly to the HDMI monitor.
+        </p>
+    </div>
+</div>
+</body>
+</html>
