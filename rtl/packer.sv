@@ -14,10 +14,10 @@ module packer(
     // AXI-Stream Output
     output [31:0]   out_stream_tdata,
     output [3:0]    out_stream_tkeep,
-    output          out_stream_tlast,
-    input           out_stream_tready,
-    output          out_stream_tvalid,
-    output          out_stream_tuser 
+    output  logic         out_stream_tlast,
+    input          out_stream_tready,
+    output   logic       out_stream_tvalid,
+    output   logic       out_stream_tuser 
 );
 
     localparam [1:0] STATE_IDLE = 2'b00;
