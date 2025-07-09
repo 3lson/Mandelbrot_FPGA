@@ -157,6 +157,28 @@ select {
     color: var(--text-color);
 }
 
+.benchmark-button {
+    margin-top: 10px;
+    background-color: #27ae60; /* A nice green color */
+    border-top: 1px solid #fff3;
+    padding-top: 12px;
+}
+
+.benchmark-button:hover {
+    background-color: #229954;
+}
+
+#benchmark-chart {
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 6px;
+    border: 1px solid var(--control-border);
+}
+
+.benchmark-chart-hidden {
+    display: none;
+}
+
 .metrics-display { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
 .metrics-display div span { font-weight: normal; color: var(--primary-color); }
 .render-mode { display: flex; gap: 20px; }

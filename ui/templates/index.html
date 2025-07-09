@@ -90,11 +90,13 @@
                         <button class="btn-preset" data-preset="seahorse">Seahorse Valley</button>
                         <button class="btn-preset" data-preset="elephant">Elephant Valley</button>
                         <button class="btn-preset" data-preset="spiral">Double Spiral</button>
+                        <button id="btn-benchmark" class="benchmark-button">Run Benchmark</button>
                     </div>
                 </section>
             </div>
         </main>
     </div>
+    <img id="benchmark-chart" class="benchmark-chart-hidden" alt="Benchmark Chart">
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <!-- Add this entire block before the closing </body> tag -->
 <div id="modal-container" class="modal-container">

@@ -114,7 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    displayMock.addEventListener('click', (e) => {
+    displayMock.addEventListener('mousedown', (e) => {
+        // Prevent the default browser context menu from appearing on right-click
+        e.preventDefault();
+
         const rect = displayMock.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -128,10 +131,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         viewState.centerX += ((x / width) - 0.5) * viewWidth;
         viewState.centerY += ((y / height) - 0.5) * viewHeight;
-        viewState.zoom *= 2.0;
+        
+        // Check which mouse button was pressed
+        if (e.button === 0) { // 0 is the left mouse button
+            viewState.zoom *= 1.5; // Zoom in (1.5x is a smoother zoom)
+        } else if (e.button === 2) { // 2 is the right mouse button
+            viewState.zoom /= 1.5; // Zoom out
+        }
+
+        // Add a guard to prevent zooming out too far
+        if (viewState.zoom < 1.0) {
+            viewState.zoom = 1.0;
+        }
+
+        // Send the new state to the backend
         updateView();
     });
-    
+
+    // Also, prevent the context menu from ever appearing over the display
+    displayMock.addEventListener('contextmenu', e => e.preventDefault());
+        
     document.addEventListener('keydown', (e) => {
         const panAmount = 0.2 / viewState.zoom;
         if(e.key === 'ArrowUp') viewState.centerY -= panAmount;
@@ -162,4 +181,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial Render
     updateView();
+});
+
+// In main.js, inside the main event listener function
+
+// --- Get references to the new elements ---
+const benchmarkButton = document.getElementById('btn-benchmark');
+const benchmarkChart = document.getElementById('benchmark-chart');
+
+// --- Add the new event listener for the benchmark button ---
+benchmarkButton.addEventListener('click', async () => {
+    console.log('Sending state for benchmark:', viewState);
+    updateLiveExplanation();
+    loadingSpinner.classList.remove('spinner-hidden');
+    benchmarkChart.classList.add('benchmark-chart-hidden'); // Hide old chart
+
+    try {
+        const response = await fetch('/benchmark', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(viewState),
+        });
+        const data = await response.json();
+
+        // Update the main display with the FPGA image from the benchmark
+        if (data.imageBase64) {
+            displayMock.style.backgroundImage = `url('${data.imageBase64}')`;
+            infoOverlay.style.display = 'none';
+        }
+
+        // Update the performance metrics with benchmark results
+        metricMode.textContent = `BENCHMARK (FPGA is ${data.speedup} faster)`;
+        metricTime.textContent = data.fpgaTime; // Show FPGA time
+        // We can leave FPS and Throughput blank for benchmarks
+        metricFps.textContent = '--';
+        metricThroughput.textContent = '--';
+
+        // Display the new chart
+        if (data.chartBase64) {
+            benchmarkChart.src = data.chartBase64;
+            benchmarkChart.classList.remove('benchmark-chart-hidden');
+        }
+
+    } catch (error) {
+        console.error('Error running benchmark:', error);
+        metricMode.textContent = "Error";
+    } finally {
+        loadingSpinner.classList.add('spinner-hidden');
+    }
 });

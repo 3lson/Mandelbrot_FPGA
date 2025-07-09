@@ -8,6 +8,9 @@ from flask import Flask, render_template, request, jsonify
 from PIL import Image
 import io
 import base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 # --- PYNQ Imports ---
 try:
@@ -66,11 +69,13 @@ def generate_mandelbrot_fpga(ui_state):
     if not mandel_ip or not s2mm_channel:
         print("FPGA not available, returning black frame.")
         return np.zeros((480, 640, 3), dtype=np.uint8)
+    
     s2mm_channel.mode = VIDEO_MODE
     s2mm_channel.start()
-    pan_x, pan_y = ui_state.get('centerX', -0.75), ui_state.get('centerY', 0.0)
+    
+    pan_x, pan_y = ui_state.get('centerX', -0.7), ui_state.get('centerY', 0.0)
     zoom, max_iter = ui_state.get('zoom', 1.0), ui_state.get('maxIter', 100)
-    zoom_level = int(np.log2(zoom)) if zoom > 0 else 0
+    zoom_level = int(np.log2(zoom + 0.001)) if zoom > 0 else 0
     mandel_ip.write(0x00, max_iter)
     mandel_ip.write(0x04, float_to_q4_28(pan_x))
     mandel_ip.write(0x08, float_to_q4_28(pan_y))
@@ -140,6 +145,57 @@ def update_fractal():
         "status": "ok", "fps": f"{fps:.2f}", "renderTime": f"{delay:.3f}s",
         "throughput": f"{(640*480)/delay/1e6:.2f} MPixels/s",
         "modeUsed": mode_used, "imageBase64": f"data:image/png;base64,{img_base64}"
+    })
+    
+@app.route('/benchmark', methods=['POST'])
+def run_benchmark():
+    ui_state = request.get_json()
+    
+    # --- Time the FPGA ---
+    fpga_start_time = time.perf_counter()
+    fpga_frame = generate_mandelbrot_fpga(ui_state)
+    fpga_end_time = time.perf_counter()
+    fpga_time = fpga_end_time - fpga_start_time
+    
+    # --- Time the CPU ---
+    cpu_start_time = time.perf_counter()
+    cpu_frame = generate_mandelbrot_cpu(ui_state)
+    cpu_end_time = time.perf_counter()
+    cpu_time = cpu_end_time - cpu_start_time
+    
+    # --- Generate the Benchmark Graph ---
+    speedup = cpu_time / fpga_time if fpga_time > 0 else 0
+    labels = ['CPU', 'FPGA']
+    times = [cpu_time, fpga_time]
+    
+    fig, ax = plt.subplots()
+    bars = ax.bar(labels, times, color=['#e74c3c', '#3498db'])
+    ax.set_ylabel('Render Time (seconds)')
+    ax.set_title(f'FPGA vs. CPU Benchmark (FPGA is {speedup:.1f}x faster)')
+    ax.bar_label(bars, fmt='{:.3f}s')
+    
+    # Save the plot to an in-memory buffer
+    img_buf = io.BytesIO()
+    plt.savefig(img_buf, format='png', bbox_inches='tight')
+    plt.close(fig) # Close the figure to free memory
+    img_buf.seek(0)
+    
+    # Encode the plot image to Base64
+    chart_base64 = base64.b64encode(img_buf.getvalue()).decode('utf-8')
+    
+    # Also encode the FPGA frame to display it
+    fpga_pil_img = Image.fromarray(fpga_frame)
+    fpga_buff = io.BytesIO()
+    fpga_pil_img.save(fpga_buff, format="PNG")
+    fpga_img_base64 = base64.b64encode(fpga_buff.getvalue()).decode("utf-8")
+    
+    return jsonify({
+        "status": "ok",
+        "cpuTime": f"{cpu_time:.3f}s",
+        "fpgaTime": f"{fpga_time:.3f}s",
+        "speedup": f"{speedup:.2f}x",
+        "chartBase64": f"data:image/png;base64,{chart_base64}",
+        "imageBase64": f"data:image/png;base64,{fpga_img_base64}"
     })
 
 if __name__ == '__main__':

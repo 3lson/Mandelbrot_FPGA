@@ -114,7 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    displayMock.addEventListener('click', (e) => {
+    displayMock.addEventListener('mousedown', (e) => {
+        // Prevent the default browser context menu from appearing on right-click
+        e.preventDefault();
+
         const rect = displayMock.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -128,10 +131,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         viewState.centerX += ((x / width) - 0.5) * viewWidth;
         viewState.centerY += ((y / height) - 0.5) * viewHeight;
-        viewState.zoom *= 2.0;
+        
+        // Check which mouse button was pressed
+        if (e.button === 0) { // 0 is the left mouse button
+            viewState.zoom *= 1.5; // Zoom in (1.5x is a smoother zoom)
+        } else if (e.button === 2) { // 2 is the right mouse button
+            viewState.zoom /= 1.5; // Zoom out
+        }
+
+        // Add a guard to prevent zooming out too far
+        if (viewState.zoom < 1.0) {
+            viewState.zoom = 1.0;
+        }
+
+        // Send the new state to the backend
         updateView();
     });
-    
+
+    displayMock.addEventListener('contextmenu', e => e.preventDefault());
+        
     document.addEventListener('keydown', (e) => {
         const panAmount = 0.2 / viewState.zoom;
         if(e.key === 'ArrowUp') viewState.centerY -= panAmount;
