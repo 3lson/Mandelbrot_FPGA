@@ -1,5 +1,3 @@
-# app.py - FINAL, CLEANED INDENTATION
-
 import sys
 import os
 import time
@@ -20,7 +18,6 @@ try:
 except ImportError:
     PYNQ_AVAILABLE = False
 
-# This allows us to import from the same directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
@@ -29,17 +26,12 @@ from mandelbrot_utils import calculate_hw_params
 
 app = Flask(__name__)
 
-# =================================================================
-# --- GLOBAL HARDWARE HANDLES ---
-# =================================================================
 overlay = None
 s2mm_channel = None
 mandel_ip = None
 VIDEO_MODE = None
 
-# =================================================================
 # --- HARDWARE IMPLEMENTATION ---
-# =================================================================
 def initialize_hardware():
     """Loads the overlay and gets handles to our IP. Called once on startup."""
     global overlay, s2mm_channel, mandel_ip, VIDEO_MODE
@@ -84,9 +76,7 @@ def generate_mandelbrot_fpga(ui_state):
     s2mm_channel.stop()
     return frame
 
-# =================================================================
 # --- SOFTWARE (CPU) IMPLEMENTATION ---
-# =================================================================
 def mandelbrot_cpu_pixel(c_re, c_im, max_iter):
     z_re, z_im = 0.0, 0.0
     for i in range(max_iter):
@@ -116,9 +106,7 @@ def generate_mandelbrot_cpu(ui_state):
                 frame[y, x] = [min(c, 255), min(c*2, 255) % 255, 255]
     return frame
 
-# =================================================================
 # --- FLASK WEB ROUTES ---
-# =================================================================
 @app.route('/')
 def index():
     return render_template('index.html')

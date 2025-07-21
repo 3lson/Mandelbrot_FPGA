@@ -22,15 +22,28 @@ This project demonstrates a complete hardware/software co-design of a real-time 
 
 This repository serves as a portfolio piece showcasing skills in digital logic design, hardware acceleration, Python for hardware control, and full-stack web development.
 
-**[Link to a YouTube Demo Video]** (TO BE ADDED)
+![alt text](img/main.png)
 
-![UI Screenshot](path/to/your/ui_screenshot.png) (TO BE ADDED)
+## Performance: Hardware vs Software
+The primary goal of this project was to demonstrate a significant performance increase by offloading the intensive Mandelbrot calculations to the FPGA. The system can switch between hardware (PL) and software (PS) rendering in real time to provide a direct comparison.
+
+The FPGA implementation achieves an **~82x speed-up** over the pure Python/NumPy implementation running on the Zynq's ARM  A9 processor.
+
+| Mode | FPGA (Programmable Logic) | CPU (Processing System) |
+| -----| ---------------------------| ----------------------|
+| Screenshot| ![alt text](img/FPGA_perf.png) | ![alt text](img/CPU_perf.png) |
+| Render Time| 0.878 seconds | 71.810 seconds |
+| Frames Per Second | 1.14 FPS | 0.01 FPS |
+| Throughput | 0.35 MPixels/s | ~0.00 MPixels/s |
 
 ## Core Features
 
 *   **Real-Time Hardware Acceleration:** The computationally intensive Mandelbrot calculations are performed in parallel on the FPGA fabric, implemented in Verilog/SystemVerilog.
-*   **Interactive Web-Based UI:** A modern, responsive user interface built with Flask, HTML, CSS, and JavaScript allows for intuitive control from any web-enabled device (PC, tablet, phone).
-*   **Dynamic Exploration:** Users can pan, zoom, and adjust parameters in real time, receiving immediate visual feedback on an HDMI-connected display.
+*   **Interactive Web-Based UI:** A modern, responsive user interface built with Flask, HTML, CSS, and JavaScript allows for intuitive control.
+*   **Dynamic Exploration:** Users can pan, zoom, and adjust parameters in real time, receiving immediate visual feedback on an HDMI-connected display. This allows for deep exploration of the fractal's intricate details, such as the "Seahorse Valley" shown below:
+
+![alt text](img/Seahorse.png)
+
 *   **Live Performance Metrics:** The UI displays real-time statistics like Frames Per Second (FPS) and accelerator throughput (MPixels/s), directly comparing FPGA vs. CPU performance.
 *   **Educational Interface:** The application is designed to be educational, with tooltips and live explanations that describe the mathematical and hardware concepts in action.
 *   **Configurable Parameters:** Users can dynamically control:
@@ -42,8 +55,6 @@ This repository serves as a portfolio piece showcasing skills in digital logic d
 ## System Architecture
 
 The project follows a classic Zynq hardware/software co-design pattern. The system is divided between the **Processing System (PS)**, which runs a Linux OS and Python code, and the **Programmable Logic (PL)**, which contains our custom hardware accelerator. For a detailed technical breakdown of the accelerator's internal state machine and Verilog implementation, please see the **[Implementation Details](./docs/implementation.md)** document.
-
-![Block Diagram](path/to/your/block_diagram.png) (TO BE ADDED)
 
 ### Programmable Logic (PL) - The FPGA Accelerator
 
@@ -66,7 +77,7 @@ The ARM processor on the Zynq chip runs PYNQ, a Python framework for programming
 
 ## How It Works: The Data Flow
 
-1.  A user interacts with the web UI (e.g., clicks to zoom).
+1.  A user interacts with the web UI (e.g., clicks to zoom in or right click to zoom out).
 2.  The JavaScript front-end sends a JSON request to the Flask server on the PYNQ.
 3.  The Flask app uses the `mandelbrot_utils` module to convert the zoom request into hardware-specific parameters (`c_real_min`, `scale`, etc.).
 4.  The Python code writes these parameters to the accelerator's control registers via the **AXI4-Lite** bus.
@@ -82,8 +93,10 @@ The ARM processor on the Zynq chip runs PYNQ, a Python framework for programming
 *   **SoC Architecture:** AXI4-Lite and AXI4-Stream protocols, memory-mapped I/O, Direct Memory Access (DMA).
 *   **Hardware/Software Integration:** Interfacing CPU software with FPGA hardware.
 *   **Python Programming:** PYNQ, Flask, NumPy for scientific computing.
-*   **Web Development:** HTML, CSS, JavaScript (ES6+), Fetch API for client-server communication.
-*   **Verification & Debugging:** Simulation with Icarus Verilog/Verilator, GTest for C++ testbenches, and on-hardware debugging.
+*   **Web Development:** HTML, CSS, JavaScript, Fetch API for client-server communication.
+*   **Verification & Debugging:** Simulation with Verilator, GTest for C++ testbenches, and on-hardware debugging.
+
+This project is fully functional and meets all original design goals. For those interested in the ongoing development, planned architectural refinements, and feature enhancements, please see the **[TODO Details](./docs/TODO.md)**
 
 ## How to Set Up and Run
 
